@@ -171,6 +171,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+reports/
 
 # Translations
 *.mo
@@ -223,6 +224,9 @@ celerybeat-schedule
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# ruff
+.ruff_cache/
 
 # Pyre type checker
 .pyre/

@@ -22,8 +22,8 @@ poetry-remove:
 #* Installation
 .PHONY: install
 install:
-	poetry lock -n
-	poetry install -n
+	poetry lock --no-interaction
+	poetry install --no-interaction
 
 .PHONY: pre-commit-install
 pre-commit-install:
@@ -32,9 +32,7 @@ pre-commit-install:
 #* Formatters
 .PHONY: codestyle
 codestyle:
-	poetry run pyupgrade --exit-zero-even-if-changed --py39-plus **/*.py
-	poetry run autoflake --recursive --in-place --remove-all-unused-imports --ignore-init-module-imports $(CODE)
-	poetry run isort --settings-path pyproject.toml $(CODE)
+	poetry run ruff check $(CODE) --fix-only
 	poetry run black --config pyproject.toml $(CODE)
 
 .PHONY: format
@@ -43,7 +41,9 @@ format: codestyle
 #* Test
 .PHONY: test
 test:
-	poetry run pytest -c pyproject.toml --cov-report=html --cov=app $(TESTS)
+	poetry run coverage run
+	poetry run coverage report
+	poetry run coverage xml
 
 # Validate pyproject.toml
 .PHONY: check-poetry
@@ -51,10 +51,6 @@ check-poetry:
 	poetry check
 
 #* Check code style
-.PHONY: check-isort
-check-isort:
-	poetry run isort --diff --check-only --settings-path pyproject.toml $(CODE)
-
 .PHONY: check-black
 check-black:
 	poetry run black --diff --check --config pyproject.toml $(CODE)
@@ -64,41 +60,34 @@ check-darglint:
 	poetry run darglint --verbosity 2 $(CODE)
 
 .PHONY: check-codestyle
-check-codestyle: check-isort check-black check-darglint
+check-codestyle: check-black check-darglint
 
 #* Static linters
 
-.PHONY: check-pylint
-check-pylint:
-	poetry run pylint --rcfile=pyproject.toml $(CODE)
+.PHONY: check-ruff
+check-ruff:
+	poetry run ruff check $(CODE) --no-fix
 
 .PHONY: check-mypy
 check-mypy:
 	poetry run mypy --install-types --non-interactive --config-file pyproject.toml $(CODE)
 
 .PHONY: static-lint
-static-lint: check-pylint check-mypy
+static-lint: check-ruff check-mypy
 
-#* Check security issues
-
-.PHONY: check-bandit
-check-bandit:
-	poetry run bandit -ll --recursive $(CODE)
+#* Check safety
 
 .PHONY: check-safety
 check-safety:
 	poetry run safety check --full-report
 
-.PHONY: check-security
-check-security: check-safety check-bandit
-
 .PHONY: lint
-lint: check-poetry check-codestyle static-lint check-security
+lint: check-poetry check-codestyle static-lint check-safety
 
 .PHONY: update-dev-deps
 update-dev-deps:
-	poetry add -D autoflake@latest bandit@latest darglint@latest "isort[colors]@latest" mypy@latest pre-commit@latest pydocstyle@latest pylint@latest pytest@latest pyupgrade@latest safety@latest coverage@latest pytest-html@latest pytest-cov@latest
-	poetry add -D --allow-prereleases black@latest
+	poetry add -G dev black@latest darglint@latest mypy@latest pre-commit@latest \
+		pytest@latest coverage@latest safety@latest typeguard@latest ruff@latest
 
 #* Docker
 # Example: make docker-build VERSION=latest
