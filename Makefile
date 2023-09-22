@@ -55,12 +55,8 @@ check-poetry:
 check-black:
 	poetry run black --diff --check --config pyproject.toml $(CODE)
 
-.PHONY: check-darglint
-check-darglint:
-	poetry run darglint --verbosity 2 $(CODE)
-
 .PHONY: check-codestyle
-check-codestyle: check-black check-darglint
+check-codestyle: check-black
 
 #* Static linters
 
@@ -86,8 +82,8 @@ lint: check-poetry check-codestyle static-lint check-safety
 
 .PHONY: update-dev-deps
 update-dev-deps:
-	poetry add -G dev black@latest darglint@latest mypy@latest pre-commit@latest \
-		pytest@latest coverage@latest safety@latest typeguard@latest ruff@latest
+	poetry add -G dev black@latest mypy@latest pre-commit@latest pytest@latest \
+										coverage@latest safety@latest typeguard@latest ruff@latest
 
 #* Docker
 # Example: make docker-build VERSION=latest
