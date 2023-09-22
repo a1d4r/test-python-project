@@ -1,0 +1,13 @@
+# This file contains values from Cookiecutter
+
+default_context:
+  project_name: "test-python-project"
+  project_description: "Description for `test-python-project`"
+  package_name: "app"
+  git_platform: "github"
+  username: "a1d4r"
+  git_repo_url: "https://github.com/a1d4r/test-python-project"
+  email: "a1d4r@example.com"
+  version: "0.1.0"
+  minimal_python_version: "3.9"
+  line_length: "88"
